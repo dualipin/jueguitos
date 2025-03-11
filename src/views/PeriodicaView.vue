@@ -1,24 +1,29 @@
 <template>
+  <header class="flex justify-center items-center my-4">
+    <RouterLink to="/grafica" class="text-blue-500 hover:underline">Ver gráfica</RouterLink>
+  </header>
   <div class="container mx-auto p-4 py-10">
     <h1 class="text-3xl font-bold mb-4">Tabla Periódica de los Elementos</h1>
-    <input
-      v-model="searchQuery"
-      type="text"
-      placeholder="Buscar elemento..."
-      class="mb-4 p-2 border rounded w-full md:w-1/2"
-    />
     <div class="flex flex-col gap-6 w-full">
       <div
-        class="w-full xl:w-1/2 p-4 border rounded min-h-48"
-        :class="getCategoryClass(selectedElement?.category!)"
+        v-if="selectedElement"
+        class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50"
       >
-        <div v-if="selectedElement">
+        <div
+          class="bg-white p-6 border rounded-lg w-full max-w-lg"
+          :class="getCategoryClass(selectedElement?.category!)"
+        >
           <h2 class="text-2xl font-bold mb-2">{{ selectedElement.name }}</h2>
           <p><strong>Símbolo:</strong> {{ selectedElement.symbol }}</p>
           <p><strong>Número Atómico:</strong> {{ selectedElement.number }}</p>
           <p><strong>Masa Atómica:</strong> {{ selectedElement.atomicMass }}</p>
           <p><strong>Categoría:</strong> {{ selectedElement.category }}</p>
           <p><strong>Fase:</strong> {{ selectedElement.phase }}</p>
+          <div class="mt-4 flex justify-end">
+            <button class="text-red-500 hover:text-red-700" @click="selectedElement = null">
+              Cerrar
+            </button>
+          </div>
         </div>
       </div>
       <div class="overflow-x-scroll overscroll-x-auto w-full">
@@ -32,7 +37,7 @@
           <div
             v-for="element in filteredElements"
             :key="element.symbol"
-            class="border p-2 text-center cursor-pointer hover:bg-gray-200"
+            class="border rounded-lg p-2 text-center cursor-pointer hover:bg-gray-200"
             :class="getCategoryClass(element.category)"
             :style="{ gridColumn: element.group, gridRow: element.period }"
             @click="selectElement(element)"
@@ -49,7 +54,18 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import elementosData from '@/assets/elementos.json'
+import axios from '@/services/api'
 
+async function registrarInteraccion(elemento: { symbol: string }) {
+  try {
+    const response = await axios.post('/interaccion', {
+      elemento: elemento.symbol, // Envía solo el símbolo del elemento
+    })
+    console.log('Interacción registrada:', response.data)
+  } catch (error) {
+    console.error('Error al registrar interacción:', error)
+  }
+}
 const searchQuery = ref('')
 interface Element {
   symbol: string
@@ -75,6 +91,7 @@ const filteredElements = computed(() => {
 
 const selectElement = (element: Element) => {
   selectedElement.value = element
+  registrarInteraccion(element)
 }
 
 function getCategoryClass(category: string) {
