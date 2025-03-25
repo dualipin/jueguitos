@@ -1,5 +1,5 @@
 <template>
-  <div class="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg">
+  <div class="p-6 bg-white shadow-lg rounded-lg">
     <h2 class="text-2xl font-semibold mb-4">Gráfico de Interacciones</h2>
     <Line v-if="loaded" :data="chartData" :options="chartOptions" />
     <p v-else>Cargando datos...</p>

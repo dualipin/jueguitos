@@ -1,39 +1,27 @@
 # jueguitos
 
-This template should help get you started developing with Vue 3 in Vite.
+Esta plantilla debería ayudarte a comenzar a desarrollar con Vue 3 en Vite.
 
-## Recommended IDE Setup
+## Configuración recomendada del IDE
 
-[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (and disable Vetur).
+[VSCode](https://code.visualstudio.com/) + [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) (y deshabilitar Vetur).
 
-## Type Support for `.vue` Imports in TS
+## Soporte de Tipos para Importaciones de `.vue` en TS
 
-TypeScript cannot handle type information for `.vue` imports by default, so we replace the `tsc` CLI with `vue-tsc` for type checking. In editors, we need [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) to make the TypeScript language service aware of `.vue` types.
+TypeScript no puede manejar información de tipos para importaciones de `.vue` por defecto, por lo que reemplazamos el CLI `tsc` con `vue-tsc` para la comprobación de tipos. En los editores, necesitamos [Volar](https://marketplace.visualstudio.com/items?itemName=Vue.volar) para hacer que el servicio de lenguaje de TypeScript reconozca los tipos de `.vue`.
 
-## Customize configuration
+## Personalizar configuración
 
-See [Vite Configuration Reference](https://vite.dev/config/).
+Consulta la [Referencia de Configuración de Vite](https://vite.dev/config/).
 
-## Project Setup
+## Configuración del Proyecto
 
 ```sh
-npm install
+npm install --force
 ```
 
-### Compile and Hot-Reload for Development
+### Compilar y Recargar en Caliente para Desarrollo
 
 ```sh
 npm run dev
-```
-
-### Type-Check, Compile and Minify for Production
-
-```sh
-npm run build
-```
-
-### Lint with [ESLint](https://eslint.org/)
-
-```sh
-npm run lint
 ```
