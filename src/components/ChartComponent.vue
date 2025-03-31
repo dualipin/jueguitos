@@ -52,9 +52,9 @@ export default {
   },
   async mounted() {
     try {
-      const response = await axios.get('/api/interacciones')
-      if (response.data && response.data.data) {
-        const interacciones = response.data.data
+      const response = await axios.get('/interacciones')
+      if (response.data && response.data) {
+        const interacciones = response.data
 
         const elementCount = {}
         interacciones.forEach((i) => {
