@@ -9,11 +9,11 @@ const checkAnswer = (option: string) => {
   selectedAnswer.value = option
   isCorrect.value = option === props.question.respuesta
 
-  setTimeout(() => {
-    props.onNext()
-    selectedAnswer.value = null
-    isCorrect.value = null
-  }, 1000)
+  // setTimeout(() => {
+  props.onNext(isCorrect.value)
+  // }, 500)
+  //   selectedAnswer.value = null
+  //   isCorrect.value = null
 }
 </script>
 
