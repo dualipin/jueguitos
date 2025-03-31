@@ -1,10 +1,12 @@
 <script setup lang="ts">
 import { ref } from 'vue'
-import questions from '@/data/preguntas.json'
+import questionsData from '@/data/preguntas.json'
 import QuestionCard from '@/components/QuestionCard.vue'
 
 const currentQuestionIndex = ref(0)
 const score = ref(0)
+
+const questions = questionsData.sort(() => Math.random() - 0.5).slice(0, 5)
 
 const nextQuestion = () => {
   if (currentQuestionIndex.value < questions.length - 1) {
