@@ -56,6 +56,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+// import api from '@/services/api'
 
 const authStore = useAuthStore()
 const router = useRouter()
@@ -65,7 +66,8 @@ const errorResponse = ref('')
 
 const login = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/login', {
+    console.log(import.meta.env.VITE_API_URL)
+    const response = await fetch(import.meta.env.VITE_API_URL + '/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

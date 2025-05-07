@@ -22,13 +22,13 @@ const fetchQuestions = async () => {
     loading.value = true
     if (useIA.value) {
       // Fetch questions from the API
-      const response = await fetch('http://localhost:8000/api/preguntas/ai/')
+      const response = await fetch(`${import.meta.env.VITE_API_URL}/api/preguntas/ai/`)
       const data = await response.json()
       questions.value = data as []
       loading.value = false
       return
     }
-    const response = await fetch('http://localhost:8000/api/preguntas/aleatorias/')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/preguntas/aleatorias/`)
     const data = await response.json()
     questions.value = data as []
     loading.value = false

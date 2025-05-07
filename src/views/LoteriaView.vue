@@ -165,7 +165,10 @@ const connectToGame = async () => {
 
   // Generar cartón
   try {
-    const response = await fetch('http://localhost:8000/generar-carton/16')
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generar-carton/16`)
+    if (!response.ok) {
+      throw new Error('Error al generar cartón')
+    }
     playerCard.value = await response.json()
   } catch (error) {
     console.error('Error al generar cartón:', error)
@@ -180,7 +183,7 @@ const connectToGame = async () => {
 
 // Conectar al WebSocket
 const connectWebSocket = () => {
-  socket.value = new WebSocket(`ws://localhost:8000/ws/${playerId.value}`)
+  socket.value = new WebSocket(`ws://${import.meta.env.VITE_API_HOST}/ws/${playerId.value}`)
 
   socket.value.onopen = () => {
     console.log('Conectado al servidor WebSocket')
