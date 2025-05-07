@@ -67,7 +67,7 @@ const errorResponse = ref('')
 const login = async () => {
   try {
     console.log(import.meta.env.VITE_API_URL)
-    const response = await fetch(import.meta.env.VITE_API_URL + '/api/login', {
+    const response = await fetch(import.meta.env.VITE_API_URL + '/api/login/', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
