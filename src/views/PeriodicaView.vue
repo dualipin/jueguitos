@@ -90,14 +90,13 @@
 </template>
 
 <script setup lang="ts">
-import { onMounted, onUnmounted, ref } from 'vue'
+import { onMounted, onUnmounted, ref, watch } from 'vue'
 import type { ElementoQuimico } from '@/types/Elemento'
-import elementosJSON from '@/data/elementos.json'
 import ElementoQuimicoItem from '@/components/tabla-periodica/ElementoQuimicoItem.vue'
 import api from '@/services/api'
 import { getCookie } from '@/utils/getCookie'
 
-const elementos = ref<ElementoQuimico[]>(elementosJSON.elementos as ElementoQuimico[])
+const elementos = ref<ElementoQuimico[]>([])
 const elementoSeleccionado = ref<ElementoQuimico | null>(null)
 const showModal = ref(false)
 
@@ -123,14 +122,66 @@ function elementsGridStyle(elemento: ElementoQuimico) {
   }
 }
 
+/**
+ * @param texto Texto a hablar
+ * @description Función que utiliza la API de SpeechSynthesis para hablar el texto proporcionado.
+ * @returns {void}
+ */
+function hablarTexto(texto: string): void {
+  const synth = window.speechSynthesis
+  const utterThis = new SpeechSynthesisUtterance(texto)
+  utterThis.lang = 'es-ES'
+  synth.speak(utterThis)
+}
+
 async function openElement(elemento: ElementoQuimico) {
-  await api.post('/interacciones', {
-    elemento: elemento.nombre,
-    usuario_cookie: getCookie('usuario_cookie'),
-  })
   elementoSeleccionado.value = elemento
   showModal.value = true
+
+  const texto =
+    elemento.nombre +
+    ' es un elemento químico con número atómico ' +
+    elemento.numeroAtomico +
+    ' y símbolo ' +
+    elemento.simbolo +
+    'al que pertenece a la categoría de ' +
+    elemento.categoria +
+    ' y se encuentra en el grupo ' +
+    elemento.grupo +
+    ' y período ' +
+    elemento.periodo +
+    ' con un peso atómico de ' +
+    elemento.pesoAtomico +
+    ' y una valencia de ' +
+    elemento.valencia +
+    ' y una densidad de ' +
+    elemento.densidad +
+    ' y un punto de fusión de ' +
+    elemento.puntoFusion +
+    ' y un punto de ebullición de ' +
+    elemento.puntoEbullicion +
+    ' y una estructura atómica de ' +
+    elemento.estructuraAtomica +
+    ' y un dato curioso de ' +
+    elemento.datoCurioso
+
+  hablarTexto(texto)
+
+  await api.post('/interaccion_periodica', {
+    elemento: elemento.nombre,
+    cookie_id: getCookie('usuario_cookie'),
+  })
 }
+
+watch(
+  () => showModal.value,
+  (newValue) => {
+    if (!newValue) {
+      window.speechSynthesis.cancel()
+    }
+  },
+  { immediate: true },
+)
 
 function closeElement() {
   elementoSeleccionado.value = null
@@ -138,17 +189,28 @@ function closeElement() {
 
 const milisecond = ref<number>(0)
 
+async function getElements() {
+  try {
+    const response = await api.get('/tabla_periodica')
+    elementos.value = response.data.elementos
+  } catch (error) {
+    console.error('Error fetching elements:', error)
+  }
+}
+
 onMounted(async () => {
   milisecond.value = new Date().getTime()
+
+  await getElements()
 })
 
 onUnmounted(async () => {
   const time = new Date().getTime() - milisecond.value
   try {
-    await api.post('/tiempos_pagina', {
-      page: 'Tabla Periódica',
+    await api.post('/tiempo_pagina', {
+      pagina: 'Tabla Periódica',
       tiempo: time,
-      usuario_cookie: getCookie('usuario_cookie'),
+      cookie_id: getCookie('usuario_cookie'),
     })
   } catch (error) {
     console.log(error)

@@ -13,11 +13,25 @@ const router = createRouter({
           path: '',
           name: 'periodica',
           component: () => import('../views/PeriodicaView.vue'),
+          meta: {
+            requiresAuth: true,
+          },
         },
         {
           path: 'preguntas',
           name: 'preguntas',
           component: () => import('../views/PreguntasView.vue'),
+          meta: {
+            requiresAuth: true,
+          },
+        },
+        {
+          path: 'loteria',
+          name: 'loteria',
+          component: () => import('../views/LoteriaView.vue'),
+          meta: {
+            requiresAuth: true,
+          },
         },
         {
           path: '/about',
@@ -32,6 +46,11 @@ const router = createRouter({
           name: 'login',
           component: () => import('../views/LoginView.vue'),
         },
+        {
+          path: '/register',
+          name: 'register',
+          component: () => import('../views/RegisterView.vue'),
+        },
       ],
     },
     {
@@ -42,10 +61,35 @@ const router = createRouter({
           path: 'dashboard',
           name: 'dashboard',
           component: () => import('../views/DashboardView.vue'),
+          meta: {
+            requiresAuth: true,
+            role: 'administrador',
+          },
+        },
+        {
+          path: 'registrar-publicacion',
+          name: 'registrar-publicacion',
+          component: () => import('../views/RegistrarPublicacionView.vue'),
         },
       ],
     },
   ],
+})
+
+router.beforeEach((to, from, next) => {
+  const isAuthenticated = localStorage.getItem('user') !== null
+  const requiresAuth = to.matched.some((record) => record.meta.requiresAuth)
+  const userRole = JSON.parse(localStorage.getItem('user') || 'null')?.role
+
+  console.log(userRole)
+
+  if (requiresAuth && !isAuthenticated) {
+    next({ name: 'login' })
+  } else if (userRole !== to.meta.role && to.name === 'dashboard') {
+    next({ name: 'login' })
+  } else {
+    next()
+  }
 })
 
 export default router

@@ -1,13 +1,37 @@
 <script setup lang="ts">
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 const activeElement = ref('Dashboard')
 
-const items = [
+type Item = {
+  title: string
+  icon: string
+  to?: { name: string }
+  children?: Item[]
+}
+
+const items: Item[] = [
   { title: 'Dashboard', icon: 'dashboard', to: { name: 'dashboard' } },
   {
     title: 'Reportes',
     icon: 'bar_chart',
+  },
+  {
+    title: 'Redes Sociales',
+    icon: 'share',
+    children: [
+      {
+        title: 'Facebook',
+        icon: 'facebook',
+        to: { name: 'registrar-publicacion' },
+      },
+      {
+        title: 'Twitter',
+        icon: 'X',
+      },
+    ],
   },
 ]
 </script>
@@ -42,7 +66,12 @@ const items = [
                   v-for="child in item.children"
                   :key="child.title"
                   :active="child.title === activeElement"
-                  @click="activeElement = child.title"
+                  @click="
+                    () => {
+                      activeElement = child.title
+                      if (child.to) router.push(child.to)
+                    }
+                  "
                 >
                   <VaSidebarItemContent>
                     <VaIcon :name="child.icon" />
@@ -56,7 +85,12 @@ const items = [
               v-else
               :key="item.title + 'item'"
               :active="item.title === activeElement"
-              @click="activeElement = item.title"
+              @click="
+                () => {
+                  activeElement = item.title
+                  if (item.to) router.push(item.to)
+                }
+              "
             >
               <VaSidebarItemContent>
                 <VaIcon :name="item.icon" />
