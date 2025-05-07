@@ -165,7 +165,7 @@ const connectToGame = async () => {
 
   // Generar cartón
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generar-carton/16`)
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generar-carton/16/`)
     if (!response.ok) {
       throw new Error('Error al generar cartón')
     }
