@@ -14,6 +14,29 @@ if (cookie_id === '' || cookie_id === null) {
 const router = useRouter()
 const authStore = useAuthStore()
 const user = computed(() => authStore.user)
+
+const menuItems = [
+  {
+    name: 'periodica',
+    label: 'Tabla Periódica',
+  },
+  {
+    name: 'preguntas',
+    label: 'Preguntas',
+  },
+  {
+    name: 'loteria',
+    label: 'Loteria',
+  },
+  {
+    name: 'compuestos',
+    label: 'Compuestos',
+  },
+  {
+    name: 'dashboard',
+    label: 'Dashboard',
+  },
+]
 </script>
 
 <template>
@@ -25,17 +48,8 @@ const user = computed(() => authStore.user)
         </RouterLink>
       </template>
       <template #right>
-        <VaNavbarItem class="text-lg hidden sm:block">
-          <RouterLink :to="{ name: 'periodica' }">Tabla Periódica</RouterLink>
-        </VaNavbarItem>
-        <VaNavbarItem class="text-lg hidden sm:block">
-          <RouterLink :to="{ name: 'preguntas' }">Preguntas</RouterLink>
-        </VaNavbarItem>
-        <VaNavbarItem class="text-lg hidden sm:block">
-          <RouterLink :to="{ name: 'loteria' }">Loteria</RouterLink>
-        </VaNavbarItem>
-        <VaNavbarItem class="text-lg hidden sm:block">
-          <RouterLink :to="{ name: 'dashboard' }">Dashboard</RouterLink>
+        <VaNavbarItem v-for="item in menuItems" :key="item.name" class="text-lg hidden sm:block">
+          <RouterLink :to="{ name: item.name }">{{ item.label }}</RouterLink>
         </VaNavbarItem>
         <VaNavbarItem>
           <VaMenu>

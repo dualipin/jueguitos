@@ -6,11 +6,6 @@
 
     <!-- Pantalla de entrada -->
     <div v-if="!playerConnected" class="flex flex-col items-center gap-4">
-      <input
-        v-model="playerName"
-        placeholder="Ingresa tu nombre"
-        class="px-4 py-2 border rounded w-full max-w-md"
-      />
       <button
         @click="connectToGame"
         class="bg-emerald-600 text-white px-6 py-2 rounded hover:bg-emerald-700"
@@ -90,8 +85,21 @@
       </div>
 
       <!-- Cartón del jugador -->
-      <div>
+      <div v-if="authStore.user?.role == 'estudiante'" class="bg-gray-100 p-4 rounded-lg">
         <h2 class="text-2xl font-semibold mb-4">Tu Cartón</h2>
+        <div class="mb-4 flex justify-end">
+          <button
+            @click="
+              async () => {
+                markedElements = new Set()
+                playerCard = await generateCard()
+              }
+            "
+            class="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
+          >
+            Reiniciar Cartón
+          </button>
+        </div>
         <div class="grid grid-cols-4 gap-2">
           <div
             v-for="element in playerCard"
@@ -124,6 +132,7 @@
 <script setup lang="ts">
 import { ref, onBeforeUnmount } from 'vue'
 import { v4 as uuid } from 'uuid'
+import { useAuthStore } from '@/stores/auth'
 
 interface Element {
   numero: number
@@ -131,7 +140,8 @@ interface Element {
   nombre: string
 }
 
-const playerName = ref('')
+const authStore = useAuthStore()
+const playerName = ref(authStore.user?.username)
 const playerId = ref('')
 const playerConnected = ref(false)
 const playerCard = ref<Element[]>([])
@@ -151,6 +161,14 @@ const generatePlayerId = (): string => {
   return uuid()
 }
 
+async function generateCard() {
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/generar-carton/16/`)
+  if (!response.ok) {
+    throw new Error('Error al generar cartón')
+  }
+  return await response.json()
+}
+
 // Conectar al juego
 const connectToGame = async () => {
   if (!playerName.value) return
@@ -158,18 +176,19 @@ const connectToGame = async () => {
   // Generar un ID de jugador
   playerId.value = generatePlayerId()
 
-  // El primer jugador es admin
-  if (playersCount.value === 0) {
-    isAdmin.value = true
-  }
+  // El usuario es admin si es el primero en conectarse o si tiene rol de profesor
+  const isUserProfessor = authStore.user?.role === 'profesor'
+  isAdmin.value = isUserProfessor
 
   // Generar cartón
   try {
-    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/generar-carton/16/`)
-    if (!response.ok) {
-      throw new Error('Error al generar cartón')
+    if (authStore.user?.role === 'estudiante') {
+      const cardData = await generateCard()
+      playerCard.value = cardData
+    } else {
+      // Para profesores o administradores, no necesitan un cartón
+      playerCard.value = []
     }
-    playerCard.value = await response.json()
   } catch (error) {
     console.error('Error al generar cartón:', error)
     return
@@ -271,9 +290,18 @@ const handleWebSocketMessage = (message: WebSocketMessage) => {
       // Nuevo elemento sacado
       if (message.element) {
         currentElement.value = message.element
-        if (!calledElements.value.some((e) => e.numero === message.element?.numero)) {
-          calledElements.value.push(message.element)
-        }
+        // Agregar el elemento a la lista de llamados si no está ya presente
+        // Esto evita duplicados en la lista de llamados
+        // calledElements.value = calledElements.value.filter(
+        //   (e) => e.numero !== message.element?.numero,
+        // )
+        // Añadir el nuevo elemento a la lista de elementos llamados
+        calledElements.value.push(message.element)
+
+        // if (!calledElements.value.some((e) => e.numero === message.element?.numero)) {
+        //   calledElements.value.push(message.element)
+        //   console.log('Elemento llamado:', message.element)
+        // }
       }
       break
 
@@ -326,6 +354,10 @@ const resetGame = () => {
       }),
     )
   }
+
+  if (socket.value) {
+    connectWebSocket()
+  }
 }
 
 // Marcar un elemento en el cartón
@@ -336,13 +368,21 @@ const markElement = (element: Element) => {
   if (gameActive.value && elementoExiste) {
     markedElements.value.add(element.numero)
 
+    if (socket.value) {
+      socket.value.send(
+        JSON.stringify({
+          type: 'mark_element',
+          numero: element.numero,
+        }),
+      )
+    }
     // Notificar al servidor
-    socket.value?.send(
-      JSON.stringify({
-        type: 'mark_element',
-        element_num: element.numero,
-      }),
-    )
+    // socket.value?.send(
+    //   JSON.stringify({
+    //     type: 'mark_element',
+    //     element_num: element.numero,
+    //   }),
+    // )
   }
 }
 

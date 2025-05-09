@@ -1,11 +1,14 @@
 <script setup lang="ts">
 import { onMounted, ref, watch } from 'vue'
 import QuestionCard from '@/components/QuestionCard.vue'
+import { useAuthStore } from '@/stores/auth'
 
+const authStore = useAuthStore()
 const currentQuestionIndex = ref(0)
 const score = ref(0)
 const showModal = ref(false)
 const useIA = ref(false)
+const esProfesor = ref(authStore.user?.role === 'profesor')
 
 const loading = ref(false)
 
@@ -40,8 +43,6 @@ const fetchQuestions = async () => {
   }
 }
 
-// const questions = questionsData.sort(() => Math.random() - 0.5).slice(0, 5)
-
 const nextQuestion = async (isCorrect: boolean) => {
   if (isCorrect) {
     score.value++
@@ -54,6 +55,41 @@ const nextQuestion = async (isCorrect: boolean) => {
   }
 }
 
+const pregunta = ref({
+  pregunta: '',
+  opciones: [],
+  respuesta: '',
+  creado_por: authStore.user?.username,
+})
+
+const opcion = ref('')
+
+async function crearPregunta() {
+  try {
+    loading.value = true
+    const response = await fetch(`${import.meta.env.VITE_API_URL}/api/preguntas/crear/`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(pregunta.value),
+    })
+    const data = await response.json()
+    console.log('Pregunta creada:', data)
+  } catch (error) {
+    console.error('Error creating question:', error)
+  } finally {
+    loading.value = false
+    pregunta.value = {
+      pregunta: '',
+      opciones: [],
+      respuesta: '',
+      creado_por: authStore.user?.username,
+    }
+    opcion.value = ''
+  }
+}
+
 onMounted(async () => {
   // Simulate fetching questions from an API
   await fetchQuestions()
@@ -63,7 +99,87 @@ onMounted(async () => {
 </script>
 
 <template>
+  <template v-if="loading">
+    <div class="fixed inset-0 flex flex-col gap-10 items-center justify-center bg-white z-50">
+      <span
+        class="aspect-square w-16 border-2 border-gray-300 rounded-full animate-spin border-t-transparent"
+      ></span>
+      <span class="text-2xl font-bold text-gray-700">Cargando...</span>
+    </div>
+  </template>
+
   <div class="min-h-screen flex flex-col items-center justify-center">
+    <div v-if="esProfesor" class="w-full max-w-5xl mb-8 p-6 bg-white rounded-lg shadow-md">
+      <h2 class="text-xl font-bold mb-4 text-center">Crear Nueva Pregunta</h2>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+        <VaInput
+          v-model="pregunta.pregunta"
+          placeholder="Ingrese la pregunta"
+          label="Pregunta"
+          class="mb-2"
+        />
+        <VaInput
+          v-model="pregunta.respuesta"
+          placeholder="Ingrese la respuesta correcta"
+          label="Respuesta correcta"
+          class="mb-2"
+        />
+      </div>
+
+      <div class="mt-4 border-t pt-4">
+        <div class="flex justify-between items-center mb-3">
+          <label class="font-semibold text-gray-700">Opciones existentes</label>
+          <div class="text-sm text-gray-500">{{ pregunta.opciones.length }} opciones</div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-4">
+          <div v-for="(opcion, index) in pregunta.opciones" :key="index" class="flex items-center">
+            <VaInput v-model="pregunta.opciones[index]" placeholder="Opción" class="flex-grow" />
+            <VaButton
+              @click="() => pregunta.opciones.splice(index, 1)"
+              icon="delete"
+              preset="danger"
+              size="small"
+              class="ml-2"
+              flat
+            />
+          </div>
+        </div>
+
+        <div class="flex mt-3 mb-4">
+          <VaInput v-model="opcion" placeholder="Ingrese una nueva opción" class="flex-grow mr-2" />
+          <VaButton
+            @click="
+              () => {
+                if (opcion.trim().length > 0) {
+                  //@ts-ignore
+                  pregunta.opciones.push(opcion)
+                  opcion = ''
+                }
+              }
+            "
+            class="whitespace-nowrap"
+            ><VaIcon icon="plus" class="mr-1" /> Agregar</VaButton
+          >
+        </div>
+      </div>
+
+      <div class="flex justify-end mt-6">
+        <VaButton @click="crearPregunta" preset="primary" size="large" :loading="loading">
+          <VaIcon icon="save" class="mr-2" /> Guardar Pregunta
+        </VaButton>
+      </div>
+    </div>
+
+    <div class="flex items-center mb-4">
+      <RouterLink
+        :to="{ name: 'preguntas-profesor' }"
+        class="bg-blue-500 hover:bg-blue-700 font-semibold text-lg text-white py-2 px-4 rounded"
+        >Contestar preguntas de un profesor</RouterLink
+      >
+    </div>
+
     <div class="w-full max-w-md">
       <h1 class="text-2xl font-bold text-center mb-4">🧪 Quiz de Química</h1>
       <div>

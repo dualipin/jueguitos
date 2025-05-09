@@ -18,6 +18,22 @@ const router = createRouter({
           },
         },
         {
+          path: 'compuestos',
+          name: 'compuestos',
+          component: () => import('../views/CompuestosView.vue'),
+          meta: {
+            requiresAuth: true,
+          },
+        },
+        {
+          path: 'preguntas-profesor',
+          name: 'preguntas-profesor',
+          component: () => import('../views/preguntas/JuegoPreguntasProfesor.vue'),
+          meta: {
+            requiresAuth: true,
+          },
+        },
+        {
           path: 'preguntas',
           name: 'preguntas',
           component: () => import('../views/PreguntasView.vue'),
