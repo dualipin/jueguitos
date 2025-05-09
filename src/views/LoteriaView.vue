@@ -162,7 +162,7 @@ const generatePlayerId = (): string => {
 }
 
 async function generateCard() {
-  const response = await fetch(`${import.meta.env.VITE_API_URL}/generar-carton/16/`)
+  const response = await fetch(`${import.meta.env.VITE_API_URL}/generar-carton/16`)
   if (!response.ok) {
     throw new Error('Error al generar cartón')
   }
