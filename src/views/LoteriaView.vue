@@ -202,7 +202,7 @@ const connectToGame = async () => {
 
 // Conectar al WebSocket
 const connectWebSocket = () => {
-  socket.value = new WebSocket(`ws://${import.meta.env.VITE_API_HOST}/ws/${playerId.value}`)
+  socket.value = new WebSocket(`${import.meta.env.VITE_API_HOST}/ws/${playerId.value}`)
 
   socket.value.onopen = () => {
     console.log('Conectado al servidor WebSocket')
