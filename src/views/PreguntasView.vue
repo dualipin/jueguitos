@@ -108,8 +108,8 @@ onMounted(async () => {
     </div>
   </template>
 
-  <div class="min-h-screen flex flex-col items-center justify-center">
-    <div v-if="esProfesor" class="w-full max-w-5xl mb-8 p-6 bg-white rounded-lg shadow-md">
+  <div class="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div v-if="esProfesor" class="w-full max-w-5xl mb-8 p-4 md:p-6 bg-white rounded-lg shadow-md">
       <h2 class="text-xl font-bold mb-4 text-center">Crear Nueva Pregunta</h2>
 
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
@@ -128,7 +128,7 @@ onMounted(async () => {
       </div>
 
       <div class="mt-4 border-t pt-4">
-        <div class="flex justify-between items-center mb-3">
+        <div class="flex flex-wrap justify-between items-center mb-3">
           <label class="font-semibold text-gray-700">Opciones existentes</label>
           <div class="text-sm text-gray-500">{{ pregunta.opciones.length }} opciones</div>
         </div>
@@ -147,8 +147,12 @@ onMounted(async () => {
           </div>
         </div>
 
-        <div class="flex mt-3 mb-4">
-          <VaInput v-model="opcion" placeholder="Ingrese una nueva opción" class="flex-grow mr-2" />
+        <div class="flex flex-col sm:flex-row mt-3 mb-4">
+          <VaInput
+            v-model="opcion"
+            placeholder="Ingrese una nueva opción"
+            class="flex-grow mb-2 sm:mb-0 sm:mr-2"
+          />
           <VaButton
             @click="
               () => {
@@ -165,24 +169,24 @@ onMounted(async () => {
         </div>
       </div>
 
-      <div class="flex justify-end mt-6">
+      <div class="flex justify-center md:justify-end mt-6">
         <VaButton @click="crearPregunta" preset="primary" size="large" :loading="loading">
           <VaIcon icon="save" class="mr-2" /> Guardar Pregunta
         </VaButton>
       </div>
     </div>
 
-    <div class="flex items-center mb-4">
+    <div class="flex items-center mb-4 w-full justify-center">
       <RouterLink
         :to="{ name: 'preguntas-profesor' }"
-        class="bg-blue-500 hover:bg-blue-700 font-semibold text-lg text-white py-2 px-4 rounded"
+        class="bg-blue-500 hover:bg-blue-700 font-semibold text-lg text-white py-2 px-4 rounded text-center w-full sm:w-auto"
         >Contestar preguntas de un profesor</RouterLink
       >
     </div>
 
-    <div class="w-full max-w-md">
+    <div class="w-full max-w-md" v-if="!esProfesor">
       <h1 class="text-2xl font-bold text-center mb-4">🧪 Quiz de Química</h1>
-      <div>
+      <div class="flex justify-center">
         <VaSwitch
           v-model="useIA"
           class="mb-4"

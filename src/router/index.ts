@@ -42,9 +42,22 @@ const router = createRouter({
           },
         },
         {
+          path: 'nosotros',
+          name: 'nosotros',
+          component: () => import('../views/NosotrosView.vue'),
+        },
+        {
           path: 'loteria',
           name: 'loteria',
           component: () => import('../views/LoteriaView.vue'),
+          meta: {
+            requiresAuth: true,
+          },
+        },
+        {
+          path: 'laloteria',
+          name: 'laloteria',
+          component: () => import('../views/LaloteriaView.vue'),
           meta: {
             requiresAuth: true,
           },

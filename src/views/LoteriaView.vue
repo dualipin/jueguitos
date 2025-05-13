@@ -58,7 +58,7 @@
           >
             <div class="text-4xl font-bold text-emerald-600">{{ currentElement.simbolo }}</div>
             <div class="text-lg mt-2">{{ currentElement.nombre }}</div>
-            <div class="text-sm text-gray-600">{{ currentElement.numero }}</div>
+            <div class="text-sm text-gray-600">{{ currentElement.numeroAtomico }}</div>
           </div>
           <div v-if="winners.length > 0" class="mt-4 text-center">
             <h3 class="text-xl font-bold text-yellow-600">¡Ganadores!</h3>
@@ -75,11 +75,11 @@
         <div class="flex flex-wrap gap-2">
           <div
             v-for="elemento in calledElements"
-            :key="elemento.numero"
+            :key="elemento.numeroAtomico"
             class="flex items-center justify-center p-2 bg-gray-200 rounded text-xs"
           >
             <span class="font-bold">{{ elemento.simbolo }}</span>
-            <span class="ml-1">({{ elemento.numero }})</span>
+            <span class="ml-1">({{ elemento.numeroAtomico }})</span>
           </div>
         </div>
       </div>
@@ -87,7 +87,7 @@
       <!-- Cartón del jugador -->
       <div v-if="authStore.user?.role == 'estudiante'" class="bg-gray-100 p-4 rounded-lg">
         <h2 class="text-2xl font-semibold mb-4">Tu Cartón</h2>
-        <div class="mb-4 flex justify-end">
+        <!-- <div class="mb-4 flex justify-end">
           <button
             @click="
               async () => {
@@ -99,11 +99,11 @@
           >
             Reiniciar Cartón
           </button>
-        </div>
+        </div> -->
         <div class="grid grid-cols-4 gap-2">
           <div
             v-for="element in playerCard"
-            :key="element.numero"
+            :key="element.numeroAtomico"
             class="aspect-square flex flex-col items-center justify-center p-2 rounded-lg shadow-md border-2"
             :class="{
               'border-emerald-500 bg-white': !isMarked(element),
@@ -121,7 +121,7 @@
               {{ element.simbolo }}
             </div>
             <div class="text-sm mt-1">{{ element.nombre }}</div>
-            <div class="text-xs text-gray-600">{{ element.numero }}</div>
+            <div class="text-xs text-gray-600">{{ element.numeroAtomico }}</div>
           </div>
         </div>
       </div>
@@ -133,12 +133,7 @@
 import { ref, onBeforeUnmount } from 'vue'
 import { v4 as uuid } from 'uuid'
 import { useAuthStore } from '@/stores/auth'
-
-interface Element {
-  numero: number
-  simbolo: string
-  nombre: string
-}
+import type { ElementoQuimico as Element } from '@/types/Elemento'
 
 const authStore = useAuthStore()
 const playerName = ref(authStore.user?.username)
@@ -290,18 +285,7 @@ const handleWebSocketMessage = (message: WebSocketMessage) => {
       // Nuevo elemento sacado
       if (message.element) {
         currentElement.value = message.element
-        // Agregar el elemento a la lista de llamados si no está ya presente
-        // Esto evita duplicados en la lista de llamados
-        // calledElements.value = calledElements.value.filter(
-        //   (e) => e.numero !== message.element?.numero,
-        // )
-        // Añadir el nuevo elemento a la lista de elementos llamados
         calledElements.value.push(message.element)
-
-        // if (!calledElements.value.some((e) => e.numero === message.element?.numero)) {
-        //   calledElements.value.push(message.element)
-        //   console.log('Elemento llamado:', message.element)
-        // }
       }
       break
 
@@ -360,41 +344,43 @@ const resetGame = () => {
   }
 }
 
-// Marcar un elemento en el cartón
-const markElement = (element: Element) => {
-  // Verificar si el elemento ha sido llamado
-  const elementoExiste = calledElements.value.some((e) => e.numero === element.numero)
-
-  if (gameActive.value && elementoExiste) {
-    markedElements.value.add(element.numero)
-
-    if (socket.value) {
-      socket.value.send(
-        JSON.stringify({
-          type: 'mark_element',
-          numero: element.numero,
-        }),
-      )
-    }
-    // Notificar al servidor
-    // socket.value?.send(
-    //   JSON.stringify({
-    //     type: 'mark_element',
-    //     element_num: element.numero,
-    //   }),
-    // )
+function markElement(element: Element) {
+  if (!socket.value) {
+    console.error('WebSocket no conectado')
+    return
   }
+
+  if (!playerCard.value.some((item) => item.numeroAtomico === element.numeroAtomico)) {
+    console.warn('Elemento no está en el cartón')
+    return
+  }
+
+  // Toggle the mark status
+  if (markedElements.value.has(element.numeroAtomico!)) {
+    markedElements.value.delete(element.numeroAtomico!)
+  } else {
+    markedElements.value.add(element.numeroAtomico!)
+  }
+
+  const message = {
+    type: 'mark_element',
+    player_id: playerId.value,
+    element_num: element.numeroAtomico,
+  }
+
+  socket.value.send(JSON.stringify(message))
 }
 
 // Comprobar si un elemento está marcado
 const isMarked = (element: Element): boolean => {
-  return markedElements.value.has(element.numero)
+  return markedElements.value.has(element.numeroAtomico!)
 }
 
 // Cerrar conexión al desmontar el componente
 onBeforeUnmount(() => {
   if (socket.value) {
     socket.value.close()
+    socket.value = null
   }
 })
 </script>
