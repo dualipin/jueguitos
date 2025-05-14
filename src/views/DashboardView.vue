@@ -2,52 +2,58 @@
   <!-- Título principal de la aplicación -->
   <h1 class="text-4xl font-bold mb-8">Dashboard</h1>
 
-  <section class="grid grid-cols-1 gap-6 md:grid-cols-2">
-    <!-- Componente de gráfico con Chart.js -->
-    <div class="col-span-full md:col-span-1">
-      <!-- Componente de gráfico con ApexCharts -->
-      <ChartComponent />
-    </div>
-    <div class="col-span-full md:col-span-1 grid grid-cols-1 gap-6 md:grid-cols-2">
-      <!-- Componente de gráfico con ApexCharts -->
-      <div class="col-span-full md:col-span-1 gap-5 flex h-full">
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <ul>
-            <li v-for="(tiempo, index) in tiempoPromedio" :key="index">
-              <h2 class="text-2xl font-bold mb-4">Tiempo promedio en {{ tiempo.page }}</h2>
-              <p class="text-gray-600 text-5xl">{{ tiempo.tiempo }}</p>
-            </li>
-          </ul>
+  <!-- Formulario de Creación de Usuario -->
+  <section class="mt-8">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+      <h2 class="text-2xl font-bold mb-4">Crear Nuevo Usuario</h2>
+
+      <form @submit.prevent="crearUsuario" class="space-y-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Nombre de usuario</label>
+          <input
+            v-model="nuevoUsuario.nombre"
+            type="text"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
         </div>
-        <!-- <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-2xl font-bold mb-4">Usuarios activos</h2>
-          <p class="text-gray-600 text-5xl">1,200</p>
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Contraseña</label>
+          <input
+            v-model="nuevoUsuario.contrasena"
+            type="password"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          />
         </div>
-        <div class="bg-white p-6 rounded-lg shadow-md">
-          <h2 class="text-2xl font-bold mb-4">Usuarios registrados</h2>
-          <p class="text-gray-600 text-5xl">5,000</p>
-        </div> -->
-      </div>
-      <!-- Componente de gráfico con ApexCharts -->
-      <div>
-        <VaButton
-          @click="
-            () => {
-              analiticaReport(
-                {
-                  avgSessionDuration: 10,
-                  bounceRate: 0.5,
-                  pageviews: 10000,
-                  sessions: 5000,
-                  users: 3000,
-                },
-                '',
-              )
-            }
-          "
-          color="primary"
-          >Actualizar</VaButton
-        >
+
+        <div>
+          <label class="block text-sm font-medium text-gray-700">Role</label>
+          <select
+            v-model="nuevoUsuario.role"
+            required
+            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500"
+          >
+            <option value="estudiante">Estudiante</option>
+            <option value="profesor">Profesor</option>
+            <option value="administrador">Administrador</option>
+          </select>
+        </div>
+
+        <div>
+          <VaButton type="submit" color="success" class="w-full"> Crear Usuario </VaButton>
+        </div>
+      </form>
+
+      <div
+        v-if="mensaje"
+        class="mt-4 p-3 rounded"
+        :class="
+          mensaje.tipo === 'exito' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+        "
+      >
+        {{ mensaje.texto }}
       </div>
     </div>
   </section>
@@ -55,10 +61,11 @@
 
 <script setup lang="ts">
 // Importa los componentes de los gráficos
-import ChartComponent from '@/components/ChartComponent.vue'
-import { analiticaReport } from '@/reports/analiticaReport'
 import api from '@/services/api'
 import { onMounted, ref } from 'vue'
+import { useToast } from 'vuestic-ui'
+
+const toast = useToast()
 
 const tiempoPromedio = ref([
   {
@@ -66,6 +73,63 @@ const tiempoPromedio = ref([
     page: 'Tabla periódica',
   },
 ])
+
+// Estado para el formulario de usuario
+const nuevoUsuario = ref({
+  nombre: '',
+  contrasena: '',
+  role: 'estudiante',
+})
+
+const mensaje = ref<null | { tipo: string; texto: string }>(null)
+
+// Función para crear usuario
+const crearUsuario = async () => {
+  try {
+    let response = null
+    if (nuevoUsuario.value.role == 'estudiante') {
+      response = await api.post('/crear_estudiante', {
+        username: nuevoUsuario.value.nombre,
+        password: nuevoUsuario.value.contrasena,
+      })
+    } else if (nuevoUsuario.value.role == 'profesor') {
+      response = await api.post('/crear_profesor', {
+        username: nuevoUsuario.value.nombre,
+        password: nuevoUsuario.value.contrasena,
+      })
+    } else if (nuevoUsuario.value.role == 'administrador') {
+      response = await api.post('/crear_administrador', {
+        username: nuevoUsuario.value.nombre,
+        password: nuevoUsuario.value.contrasena,
+      })
+    }
+
+    toast.init({
+      message: 'Usuario Creado',
+    })
+
+    mensaje.value = {
+      tipo: 'exito',
+      texto: 'Usuario creado correctamente!',
+    }
+    // Limpiar formulario
+    nuevoUsuario.value = {
+      nombre: '',
+      contrasena: '',
+      role: 'estudiante',
+    }
+
+    mensaje.value = null
+
+    console.log(response)
+  } catch (error) {
+    console.error(error)
+    mensaje.value = {
+      tipo: 'error',
+      texto: 'Error al crear usuario. Inténtelo de nuevo.',
+    }
+  }
+}
 
 onMounted(async () => {
   try {

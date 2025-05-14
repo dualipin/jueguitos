@@ -86,9 +86,9 @@ const fetchQuestions = async () => {
 const nextQuestion = async (isCorrect: boolean, userAnswer: string) => {
   // Save the answered question details
   answeredQuestions.value.push({
-    question: questions.value[currentQuestionIndex.value].pregunta,
+    question: questions.value[currentQuestionIndex.value],
     userAnswer: userAnswer,
-    correctAnswer: questions.value[currentQuestionIndex.value].respuesta,
+    correctAnswer: questions.value[currentQuestionIndex.value],
     isCorrect: isCorrect,
   })
 
@@ -173,7 +173,7 @@ onMounted(async () => {
   <!-- crear preguntas profesor  -->
   <div
     v-if="esProfesor"
-    class="w-full mt-24 max-w-5xl mb-8 p-4 md:p-6 bg-white rounded-lg shadow-md"
+    class="w-full h-full mt-32 max-w-5xl mb-8 p-4 md:p-6 bg-white rounded-lg shadow-md mx-auto"
   >
     <h2 class="text-xl font-bold mb-4 text-center">Crear Nueva Pregunta</h2>
 
@@ -242,11 +242,10 @@ onMounted(async () => {
   </div>
 
   <!-- juego -->
-  <div class="fondo-movimiento relative min-h-dvh bg-transparent flex flex-col">
+  <div v-if="!esProfesor" class="fondo-movimiento relative min-h-dvh bg-transparent flex flex-col">
     <BurbujasMovimiento color="blanco" />
     <!-- opciones pregunta -->
     <div
-      v-if="!esProfesor"
       class="z-20 w-full mt-24 items-center justify-center md:justify-end flex-col md:flex-row flex gap-2 md:gap-5 p-2 py-3 md:p-6 bg-white/30 backdrop-blur-sm shadow-md"
     >
       <button

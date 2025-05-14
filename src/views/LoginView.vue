@@ -135,7 +135,13 @@
             </div>
           </div>
 
-          <div class="flex items-center justify-between"></div>
+          <div class="flex items-center justify-between">
+            <div class="text-sm">
+              <RouterLink to="/register" class="font-medium text-black hover:text-indigo-100">
+                ¿No tienes cuenta? Regístrate
+              </RouterLink>
+            </div>
+          </div>
 
           <div>
             <button

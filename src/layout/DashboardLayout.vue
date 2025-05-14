@@ -13,11 +13,7 @@ type Item = {
 }
 
 const items: Item[] = [
-  { title: 'Dashboard', icon: 'dashboard', to: { name: 'dashboard' } },
-  {
-    title: 'Reportes',
-    icon: 'bar_chart',
-  },
+  { title: 'Usuarios', icon: 'people', to: { name: 'dashboard' } },
   {
     title: 'Redes Sociales',
     icon: 'share',
@@ -26,10 +22,6 @@ const items: Item[] = [
         title: 'Facebook',
         icon: 'facebook',
         to: { name: 'registrar-publicacion' },
-      },
-      {
-        title: 'Twitter',
-        icon: 'X',
       },
     ],
   },

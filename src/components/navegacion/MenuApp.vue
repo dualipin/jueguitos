@@ -72,7 +72,7 @@ const isMobile = computed(() => window.innerWidth < 768)
         </VaNavbarItem>
 
         <!-- User Menu -->
-        <VaNavbarItem>
+        <VaNavbarItem class="z-50">
           <VaMenu position="bottom">
             <template #anchor>
               <VaAvatar
@@ -94,7 +94,7 @@ const isMobile = computed(() => window.innerWidth < 768)
                   {{ user.username }} - {{ user.role }}
                 </span>
               </VaMenuItem>
-              <VaMenuItem>
+              <VaMenuItem class="z-50">
                 <VaButton
                   @click="
                     () => {
