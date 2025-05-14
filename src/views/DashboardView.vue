@@ -88,17 +88,17 @@ const crearUsuario = async () => {
   try {
     let response = null
     if (nuevoUsuario.value.role == 'estudiante') {
-      response = await api.post('/crear_estudiante', {
+      response = await api.post('/crear_estudiante/', {
         username: nuevoUsuario.value.nombre,
         password: nuevoUsuario.value.contrasena,
       })
     } else if (nuevoUsuario.value.role == 'profesor') {
-      response = await api.post('/crear_profesor', {
+      response = await api.post('/crear_profesor/', {
         username: nuevoUsuario.value.nombre,
         password: nuevoUsuario.value.contrasena,
       })
     } else if (nuevoUsuario.value.role == 'administrador') {
-      response = await api.post('/crear_administrador', {
+      response = await api.post('/crear_administrador/', {
         username: nuevoUsuario.value.nombre,
         password: nuevoUsuario.value.contrasena,
       })
