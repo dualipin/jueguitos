@@ -49,7 +49,7 @@ const router = createRouter({
         {
           path: 'loteria',
           name: 'loteria',
-          component: () => import('../views/LoteriaView.vue'),
+          component: () => import('../views/LaloteriaView.vue'),
           meta: {
             requiresAuth: true,
           },
