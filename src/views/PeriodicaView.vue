@@ -1,7 +1,7 @@
 <template>
   <div class="overflow-auto overflow-x-scroll">
     <div
-      class="min-w-[110rem] grid grid-cols-18 grid-rows-9 gap-2 w-auto scale-none xl:scale-90 px-10"
+      class="min-w-[110rem] mt-10 grid grid-cols-18 grid-rows-9 gap-2 w-auto scale-none xl:scale-90 px-10"
     >
       <ElementoQuimicoItem
         v-for="elemento in elementos"

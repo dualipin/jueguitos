@@ -1,10 +1,21 @@
 <script setup lang="ts">
+import BurbujasMovimiento from '@/components/BurbujasMovimiento.vue'
+import api from '@/services/api'
 import { ref } from 'vue'
 const username = ref('')
 const password = ref('')
 const confirmPassword = ref('')
 const submit = ref(false)
 const message = ref<null | string>()
+
+async function registrarEstudiante(usuario: string, contrasena: string) {
+  const data = await api.post('/crear_estudiante/', {
+    username: usuario,
+    password: contrasena,
+  })
+
+  return data
+}
 
 async function onSubmit() {
   submit.value = true
@@ -44,6 +55,7 @@ async function onSubmit() {
 
   if (!checkUser()) {
     console.error('Error en los datos de registro')
+    submit.value = true
     return
   }
 
@@ -51,30 +63,26 @@ async function onSubmit() {
 
   try {
     // Simulación de registro
-    await new Promise(() =>
-      setTimeout(() => {
-        message.value = 'Usuario registrado'
-        submit.value = false
-      }, 3000),
-    )
-    // Aquí puedes agregar la lógica para enviar los datos al servidor
-    console.log('Usuario registrado:', {
-      username: username.value,
-      password: password.value,
-      confirmPassword: confirmPassword.value,
-    })
+    submit.value = false
+    const data = await registrarEstudiante(username.value, password.value)
+
+    if (!data) message.value = 'Usuario ya existe'
+    message.value = 'Usuario registrado'
   } catch (error) {
     console.error('Error al registrar el usuario:', error)
+    message.value = 'Error al registrar el usuario'
+    submit.value = false
   }
 }
 </script>
 
 <template>
   <div
-    class="register-form bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 min-h-screen flex items-center justify-center"
+    class="px-3 bg-gradient-to-r from-blue-400 via-blue-500 to-blue-600 min-h-screen flex items-center justify-center"
   >
-    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md">
-      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Register</h2>
+    <BurbujasMovimiento color="blanco" />
+    <div class="bg-white p-8 rounded-lg shadow-lg w-full max-w-md z-10">
+      <h2 class="text-2xl font-bold text-center text-gray-800 mb-6">Regístrate</h2>
       <form @submit.prevent="onSubmit">
         <div class="form-group mb-4">
           <label for="username" class="block text-gray-700 font-medium mb-2"

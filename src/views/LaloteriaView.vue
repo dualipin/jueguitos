@@ -17,8 +17,9 @@
     >
     <!-- Removed LaloteriaGame component since it doesn't exist -->
   </div>
-  <div v-else>
-    <LoteriaGame :isGameStarted="!isGameStarted" />
+  <div v-else class="flex flex-col items-center p-6 bg-white min-h-screen">
+    <h1 class="text-2xl font-bold mt-10 mb-14">Juego de Lotería</h1>
+    <LoteriaGame />
   </div>
 </template>
 

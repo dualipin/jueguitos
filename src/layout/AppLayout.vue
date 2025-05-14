@@ -15,14 +15,16 @@ if (cookie_id === '' || cookie_id === null) {
   <div class="bg-gray-100 min-h-screen flex flex-col">
     <!-- Título principal de la aplicación -->
     <MenuApp />
-    <main class="mb-4">
+    <main>
       <router-view />
     </main>
     <footer class="bg-gray-800 mt-auto">
       <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
         <div class="flex flex-col items-center">
           <div class="flex items-center">
-            <h2 class="text-2xl font-bold text-white">Studying Chemistry</h2>
+            <RouterLink :to="{ name: 'nosotros' }">
+              <h2 class="text-2xl font-bold text-white">Studying Chemistry</h2>
+            </RouterLink>
           </div>
           <div class="mt-8 md:mt-0">
             <p class="text-center text-base text-gray-400">

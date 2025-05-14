@@ -1,114 +1,50 @@
-<template>
-  <VaChip class="mb-4" color="primary" v-if="isGameStarted">La partida ha comenzado</VaChip>
-
-  Hola: {{ name }}
-
-  <VaButton
-    class="mb-4"
-    color="success"
-    @click="
-      () => {
-        if (adminSocket && isAdminConnected) {
-          adminSocket.send(JSON.stringify({ action: 'llamar_elemento' }))
-        } else {
-          console.error('No se puede enviar el mensaje. Conexión no establecida.')
-        }
-      }
-    "
-    >Enviar mensaje</VaButton
-  >
-</template>
-
 <script setup lang="ts">
-import { onBeforeMount, ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { carton, estaMarcado, marcarElemento } from '@/composables/loteria-composable'
+import { adminSocket } from '@/composables/admin-loteria-composable'
+import { manejarCambiarCarton, jugadorSocket } from '@/composables/jugador-loteria-composable'
+import { onBeforeUnmount } from 'vue'
 
-defineProps<{
-  isGameStarted: boolean
-}>()
-
-const authStore = useAuthStore()
-const name = ref(authStore.user?.username)
-
-// estados del socket
-const socket = ref<WebSocket | null>(null)
-const adminSocket = ref<WebSocket | null>(null)
-const isConnected = ref(false)
-const isAdminConnected = ref(false)
-
-socket.value = new WebSocket(`${import.meta.env.VITE_API_HOST}/laloteria`)
-adminSocket.value = new WebSocket(`${import.meta.env.VITE_API_HOST}/admin/laloteria`)
-
-socket.value.onopen = () => {
-  console.log('Conectado al servidor de WebSocket')
-  isConnected.value = true
-}
-
-socket.value.onclose = () => {
-  console.log('Desconectado del servidor de WebSocket')
-  isConnected.value = false
-}
-
-socket.value.onerror = (error) => {
-  console.error('Error en la conexión de WebSocket:', error)
-}
-socket.value.onmessage = (event) => {
-  const data = JSON.parse(event.data)
-  console.log('Mensaje recibido del servidor:', data)
-
-  // Aquí puedes manejar los mensajes recibidos del servidor
-  // Por ejemplo, actualizar el estado del juego o la interfaz de usuario
-}
-
-adminSocket.value.onopen = () => {
-  console.log('Conectado al servidor de WebSocket admin')
-  isAdminConnected.value = true
-}
-adminSocket.value.onclose = () => {
-  console.log('Desconectado del servidor de WebSocket admin')
-  isAdminConnected.value = false
-}
-adminSocket.value.onerror = (error) => {
-  console.error('Error en la conexión de WebSocket admin:', error)
-}
-adminSocket.value.onmessage = (event) => {
-  const data = JSON.parse(event.data)
-  console.log('Mensaje recibido del servidor admin:', data)
-
-  // Aquí puedes manejar los mensajes recibidos del servidor admin
-  // Por ejemplo, actualizar el estado del juego o la interfaz de usuario
-}
-
-// const enviarMensaje = (message: { action: string }) => {
-//   if (socket.value && isConnected.value) {
-//     socket.value.send(JSON.stringify({ message }))
-//   } else {
-//     console.error('No se puede enviar el mensaje. Conexión no establecida.')
-//   }
-// }
-
-// const cerrarConexion = () => {
-//   if (socket.value) {
-//     socket.value.close()
-//     socket.value = null
-//     isConnected.value = false
-//   }
-// }
-
-onBeforeMount(() => {
-  // Cerrar la conexión del WebSocket al desmontar el componente
-  return () => {
-    if (adminSocket.value) {
-      adminSocket.value.close()
-      adminSocket.value = null
-      isAdminConnected.value = false
-    }
-    if (socket.value) {
-      socket.value.close()
-      socket.value = null
-      isConnected.value = false
-    }
-    console.log('Conexión de WebSocket cerrada')
-  }
+onBeforeUnmount(() => {
+  adminSocket.value?.close()
+  jugadorSocket.value?.close()
 })
 </script>
+
+<template>
+  <div class="">
+    <!-- controles -->
+    <div class="flex justify-between items-center mb-4">
+      <button
+        class="transition-colors bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+        @click="() => manejarCambiarCarton()"
+      >
+        Cambiar Cartón
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-4 gap-2">
+    <div
+      v-for="elemento in carton"
+      :key="elemento.numeroAtomico"
+      class="aspect-square flex flex-col items-center justify-center p-2 rounded-lg shadow-md border-2"
+      :class="{
+        'border-emerald-500 bg-white': !estaMarcado(elemento),
+        'border-emerald-600 bg-emerald-100': estaMarcado(elemento),
+      }"
+      @click="marcarElemento(elemento)"
+    >
+      <div
+        class="text-2xl font-bold"
+        :class="{
+          'text-emerald-600': !estaMarcado(elemento),
+          'text-emerald-800': estaMarcado(elemento),
+        }"
+      >
+        {{ elemento.simbolo }}
+      </div>
+      <div class="text-sm mt-1">{{ elemento.nombre }}</div>
+      <div class="text-xs text-gray-600">{{ elemento.numeroAtomico }}</div>
+    </div>
+  </div>
+</template>

@@ -1,29 +1,14 @@
 <template>
-  <!-- Elementos periódicos decorativos
-  <div class="periodic-element" style="top: 20%; left: 20%">
-    <span class="element-number">8</span>
-    <span class="element-symbol">O</span>
-    <span class="element-name">Oxígeno</span>
-  </div>
-
-  <div class="periodic-element" style="top: 15%; right: 25%">
-    <span class="element-number">1</span>
-    <span class="element-symbol">H</span>
-    <span class="element-name">Hidrógeno</span>
-  </div>
-
-  <div class="periodic-element" style="bottom: 15%; left: 25%">
-    <span class="element-number">6</span>
-    <span class="element-symbol">C</span>
-    <span class="element-name">Carbono</span>
-  </div> -->
   <div
-    class="flex-1 min-h-screen flex items-center justify-center from-blue-300 to-blue-500 bg-gradient-to-r"
-    style="
-      background-image: url('https://media.istockphoto.com/id/150964229/es/vector/sin-costuras-vector-fondo-de-laboratorio-de-ciencia.jpg?s=612x612&w=0&k=20&c=bLQamPfv9CxNcbSzW9TISGe7KXZlB0V1LmPB-YetgPc=');
-    "
+    class="flex-1 object-center bg-center min-h-screen flex items-center justify-center from-blue-300 to-blue-500 bg-gradient-to-r"
+    :style="{ backgroundImage: 'url(' + imagenfondo + ')', backgroundSize: 'cover' }"
   >
     <div class="matraz-container flex flex-col items-center">
+      <img
+        :src="logo"
+        alt="Logo"
+        class="absolute left-4 top-4 w-20 h-20 object-center bg-center rounded-full shadow-lg z-10 object-cover"
+      />
       <!-- Cuello del matraz -->
       <!-- <div class="flask-neck"></div> -->
 
@@ -104,9 +89,10 @@
               />
               <div class="absolute inset-y-0 right-0 pr-3 flex items-center">
                 <button
+                  :disabled="isLoading"
                   type="button"
                   @click="showPassword = !showPassword"
-                  class="text-gray-400 hover:text-gray-500 focus:outline-none"
+                  class="text-gray-400 hover:text-gray-500 focus:outline-none disabled:opacity-50 disabled:pointer-events-none"
                 >
                   <svg
                     v-if="showPassword"
@@ -189,70 +175,18 @@
       </div>
     </div>
   </div>
-  <!-- <div
-    class="flex-1 min-h-screen flex items-center justify-center from-blue-300 to-blue-500 bg-gradient-to-r"
-    style="
-      background-image: url('https://media.istockphoto.com/id/150964229/es/vector/sin-costuras-vector-fondo-de-laboratorio-de-ciencia.jpg?s=612x612&w=0&k=20&c=bLQamPfv9CxNcbSzW9TISGe7KXZlB0V1LmPB-YetgPc=');
-    "
-  >
-    <div class="w-full max-w-md rounded-xl shadow-lg p-6 bg-white overflow-hidden">
-      <h1 class="text-2xl font-bold text-center mb-4">Iniciar Sesión</h1>
-      <form @submit.prevent="login">
-        <div class="mb-4">
-          <label for="username" class="block text-sm font-medium text-gray-700"
-            >Correo Electrónico</label
-          >
-          <input
-            v-model="username"
-            type="text"
-            id="username"
-            name="username"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 sm:text-sm focus:ring-2 focus:ring-blue-500"
-          />
-
-          <label for="password" class="block text-sm font-medium text-gray-700 mt-4"
-            >Contraseña</label
-          >
-          <input
-            v-model="password"
-            type="password"
-            id="password"
-            name="password"
-            class="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:border-indigo-500 sm:text-sm focus:ring-2 focus:ring-blue-500"
-          />
-
-          <div v-if="errorResponse" class="text-red-500 text-sm mt-2">
-            {{ errorResponse }}
-          </div>
-
-          <button
-            type="submit"
-            class="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-          >
-            Iniciar Sesión
-          </button>
-        </div>
-      </form>
-      <div class="mt-4 text-center">
-        <p class="text-sm text-gray-600">
-          ¿No tienes una cuenta?
-          <RouterLink
-            :to="{ name: 'register' }"
-            class="font-medium text-blue-600 hover:text-blue-500"
-            >Regístrate</RouterLink
-          >
-        </p>
-      </div>
-    </div>
-  </div> -->
 </template>
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import imagenfondo from '@/assets/login.gif'
+import logo from '@/assets/logo.jpeg'
+import { useToast } from 'vuestic-ui'
 // import api from '@/services/api'
 
+const toast = useToast()
 const authStore = useAuthStore()
 const router = useRouter()
 const username = ref('')
@@ -278,6 +212,7 @@ const handleSubmit = async () => {
     if (!response.ok) {
       throw new Error('Error en la autenticación')
     }
+    isLoading.value = true
     const data = await response.json()
     if (data) {
       authStore.setUser(data)
@@ -285,7 +220,14 @@ const handleSubmit = async () => {
       router.push({ name: 'periodica' })
     } else {
       errorResponse.value = 'Error en la autenticación'
+      toast.init({
+        title: 'Error',
+        message: 'Error en la autenticación',
+        color: 'danger',
+      })
     }
+
+    isLoading.value = false
   } catch (error) {
     console.error(error)
     if (error instanceof Error) {
@@ -373,7 +315,7 @@ createBubbles()
   bottom: 0;
   left: 0;
   width: 100%;
-  background: linear-gradient(to right, #645fcc, #a280f1);
+  background: linear-gradient(to right, #8884cd, #c4b0f2);
   /* border-radius: 0 0 100px 100px; */
   transition: height 0.8s ease-in-out;
   z-index: -1;
@@ -410,7 +352,7 @@ createBubbles()
 }
 
 .flask-body {
-  background-color: rgba(255, 255, 255, 0.9);
+  background-color: rgba(255, 255, 255, 0.6);
   border-radius: 20px;
   box-shadow: 0 10px 25px rgba(79, 70, 229, 0.2);
   overflow: hidden;
